@@ -1,0 +1,27 @@
+#!/bin/sh
+#constantes
+WAN_IFACE="eth0"
+case "$1" in
+start)
+	echo "Starting fw-rules "
+	echo "1" > /proc/sys/net/ipv4/ip_forward
+	iptables -t nat -F POSTROUTING
+	iptables -F FORWARD
+	iptables -A FORWARD -o $WAN_IFACE -j ACCEPT
+	iptables -t nat -A POSTROUTING -o $WAN_IFACE -j MASQUERADE 
+	;;
+stop)
+	echo "Stopping fw-rules"
+	iptables -t nat -F POSTROUTING
+	iptables -F FORWARD
+	;;
+restart|reload)
+	$0 stop
+	$0 start
+	;;
+	*)
+	echo "Usage: $0 {start|stop|restart|reload}"
+	exit 1
+	;;
+esac
+exit 0
